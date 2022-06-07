@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script src="{{ asset('js/app.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <title>{{ config('app.name', 'Laravel') }}</title>
     </head>
@@ -38,9 +39,11 @@
                         <li class="nav-item">
                             <a class="nav-link active" aria-current="page" href="{{ route('post.index') }}">Post</a>
                         </li>
+                        @role('admin')
                         <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="#">Akun</a>
+                            <a class="nav-link" aria-current="page" href="{{ route('manajemen-pengguna.index') }}">Akun</a>
                         </li>
+                        @endrole
                     </ul>
 
                     <!-- Right Side Of Navbar -->

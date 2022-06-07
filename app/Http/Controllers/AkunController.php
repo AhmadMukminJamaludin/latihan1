@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class AkunController extends Controller
 {
@@ -13,7 +17,8 @@ class AkunController extends Controller
      */
     public function index()
     {
-        //
+        $pengguna = User::all();
+        return view('pages.akun.index', compact('pengguna'));
     }
 
     /**
@@ -34,7 +39,29 @@ class AkunController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = array(
+            'name' => 'required|unique:users',
+            'username' => 'required',
+            'email' => 'required',
+            'password' => 'required',
+            'roles' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            $messages = $validator->messages();
+            $errors = $messages->all();
+            return response()->json(["status" => "error", "message" => $errors[0]], 200);
+        };
+
+        $data = $request->except('password');
+        $data['password'] = bcrypt($request->password);
+        $data['email_verified_at'] = now();
+
+        $user = User::create($data);
+        $user->assignRole($request->roles);
+        return redirect()->route('manajemen-pengguna.index');
     }
 
     /**
@@ -68,7 +95,31 @@ class AkunController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $id = $request->id;
+        $rules = array(
+            'name' => 'required',
+            'username' => 'required',
+            'email' => 'required',
+            // 'password' => 'required',
+            'roles' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            $messages = $validator->messages();
+            $errors = $messages->all();
+            return response()->json(["status" => "error", "message" => $errors[0]], 200);
+        };
+
+        $user = User::findOrFail($id);
+        $user->name = $request->name;
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->update();
+        DB::table('model_has_roles')->where('model_id', $id)->delete();
+        $user->assignRole($request->input('roles'));
+        return redirect()->route('manajemen-pengguna.index');
     }
 
     /**
@@ -77,8 +128,10 @@ class AkunController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        //
+        $id = $request->id;
+        User::where('id', $id)->delete();
+        return redirect()->route('manajemen-pengguna.index');
     }
 }

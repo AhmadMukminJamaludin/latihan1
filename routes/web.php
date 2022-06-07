@@ -22,4 +22,5 @@ Auth::routes();
 Route::middleware('role:admin|author')->group(function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::resource('/post', App\Http\Controllers\PostController::class);
+    Route::resource('/manajemen-pengguna', App\Http\Controllers\AkunController::class);
 });
