@@ -54,7 +54,7 @@ class PostController extends Controller
 
         $post = Post::create($request->all());
         $post->save();
-        return redirect()->route('post.index');
+        return response()->json(["status" => "success", "message" => 'Post berhasil ditambahkan!'], 200);
     }
 
     /**
@@ -89,6 +89,7 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $id = $request->id;
         $rules = array(
             'title' => 'required',
             'content' => 'required',
@@ -104,8 +105,9 @@ class PostController extends Controller
             return response()->json(["status" => "error", "message" => $errors[0]], 200);
         };
 
-        Post::find($id)->update($request->all());
-        return redirect()->route('post.index');
+        $post = Post::findOrFail($id);
+        $post->update($request->all());
+        return response()->json(["status" => "success", "message" => 'Post berhasil diperbarui!'], 200);
     }
 
     /**
@@ -117,6 +119,6 @@ class PostController extends Controller
     public function destroy(Request $request)
     {
         Post::where('id', $request->id)->delete();
-        return redirect()->route('post.index');
+        return response()->json(["status" => "success", "message" => 'Post berhasil dihapus!'], 200);
     }
 }
